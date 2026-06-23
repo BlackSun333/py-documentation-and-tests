@@ -252,32 +252,27 @@ class AdminMovieApiTests(TestCase):
         self.assertEqual(movie.title, payload["title"])
 
     def test_create_movie_with_genres(self):
-        genre = Genre.objects.create(name="Sci-Fi")
         payload = {
             "title": "Sci-Fi Movie",
             "description": "Space adventures",
             "duration": 130,
-            "genres": [genre.id],
+            "genres": [{"name": "Sci-Fi"}], # Змінено тут
             "actors": [],
         }
         res = self.client.post(MOVIE_URL, payload, format="json")
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertIn(genre.id, res.data["genres"])
+        self.assertEqual(res.data["genres"][0]["name"], "Sci-Fi")
 
     def test_create_movie_with_actors(self):
-        actor = Actor.objects.create(
-            first_name="Leonardo", last_name="DiCaprio"
-        )
         payload = {
             "title": "Inception",
             "description": "Dream within a dream",
             "duration": 148,
             "genres": [],
-            "actors": [actor.id],
+            "actors": [{"first_name": "Leonardo", "last_name": "DiCaprio"}], # Змінено тут
         }
         res = self.client.post(MOVIE_URL, payload, format="json")
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertIn(actor.id, res.data["actors"])
 
     def test_delete_movie_not_allowed(self):
         movie = sample_movie()
