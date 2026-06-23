@@ -245,7 +245,7 @@ class AdminMovieApiTests(TestCase):
             "duration": 100,
         }
         res = self.client.post(MOVIE_URL, payload, format="multipart")
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED, msg=f"Помилка від DRF: {res.data}")
         movie = Movie.objects.get(id=res.data["id"])
         self.assertEqual(movie.title, payload["title"])
 
@@ -255,11 +255,10 @@ class AdminMovieApiTests(TestCase):
             "title": "Sci-Fi Movie",
             "description": "Space adventures",
             "duration": 130,
-            "genres": [genre.id], # Передаємо ID у масиві
-            "actors": [],
+            "genres": [genre.id],
         }
         res = self.client.post(MOVIE_URL, payload, format="multipart")
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED, msg=f"Помилка від DRF: {res.data}")
         self.assertIn(genre.id, res.data["genres"])
 
     def test_create_movie_with_actors(self):
@@ -270,9 +269,8 @@ class AdminMovieApiTests(TestCase):
             "title": "Inception",
             "description": "Dream within a dream",
             "duration": 148,
-            "genres": [],
             "actors": [actor.id],
         }
         res = self.client.post(MOVIE_URL, payload, format="multipart")
-        self.assertEqual(res.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(res.status_code, status.HTTP_201_CREATED, msg=f"Помилка від DRF: {res.data}")
         self.assertIn(actor.id, res.data["actors"])
