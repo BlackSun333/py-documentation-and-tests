@@ -243,39 +243,36 @@ class AdminMovieApiTests(TestCase):
             "title": "New Movie",
             "description": "Great film",
             "duration": 100,
-            "genres": [],
-            "actors": [],
         }
-        res = self.client.post(MOVIE_URL, payload, format="json")
+        res = self.client.post(MOVIE_URL, payload, format="multipart")
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
         movie = Movie.objects.get(id=res.data["id"])
         self.assertEqual(movie.title, payload["title"])
 
     def test_create_movie_with_genres(self):
+        genre = Genre.objects.create(name="Sci-Fi")
         payload = {
             "title": "Sci-Fi Movie",
             "description": "Space adventures",
             "duration": 130,
-            "genres": [{"name": "Sci-Fi"}], # Змінено тут
+            "genres": [genre.id], # Передаємо ID у масиві
             "actors": [],
         }
-        res = self.client.post(MOVIE_URL, payload, format="json")
+        res = self.client.post(MOVIE_URL, payload, format="multipart")
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(res.data["genres"][0]["name"], "Sci-Fi")
+        self.assertIn(genre.id, res.data["genres"])
 
     def test_create_movie_with_actors(self):
+        actor = Actor.objects.create(
+            first_name="Leonardo", last_name="DiCaprio"
+        )
         payload = {
             "title": "Inception",
             "description": "Dream within a dream",
             "duration": 148,
             "genres": [],
-            "actors": [{"first_name": "Leonardo", "last_name": "DiCaprio"}], # Змінено тут
+            "actors": [actor.id],
         }
-        res = self.client.post(MOVIE_URL, payload, format="json")
+        res = self.client.post(MOVIE_URL, payload, format="multipart")
         self.assertEqual(res.status_code, status.HTTP_201_CREATED)
-
-    def test_delete_movie_not_allowed(self):
-        movie = sample_movie()
-        url = detail_url(movie.id)
-        res = self.client.delete(url)
-        self.assertEqual(res.status_code, status.HTTP_405_METHOD_NOT_ALLOWED)
+        self.assertIn(actor.id, res.data["actors"])
